@@ -255,15 +255,18 @@ const symbols = [
 ]
 
 function renderSymbols(searchTerm) {
+    let copying = false;
     const parent = document.querySelector(".symbols");
     if (!searchTerm) searchTerm = "";
     searchTerm = searchTerm.toLowerCase();
     parent.innerHTML = "";
 
     const handleAction = (target) => {
-        if (!target || target.classList.contains("symbol-clicked")) {
+        if (copying) {
             return;
         }
+
+        copying = true;
 
         navigator.clipboard.writeText(target.getAttribute('glyph'));
         previousContent = target.innerHTML;
@@ -273,6 +276,7 @@ function renderSymbols(searchTerm) {
         target.classList.add("symbol-clicked");
 
         setTimeout(() => {
+            copying = false;
             target.innerHTML = previousContent;
             target.classList.remove("symbol-clicked");
             target.classList.add("symbol");
