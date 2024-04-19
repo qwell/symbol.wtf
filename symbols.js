@@ -259,6 +259,26 @@ function renderSymbols(searchTerm) {
     if (!searchTerm) searchTerm = "";
     searchTerm = searchTerm.toLowerCase();
     parent.innerHTML = "";
+
+    const handleAction = (target) => {
+        if (!target || target.classList.contains("symbol-clicked")) {
+            return;
+        }
+
+        navigator.clipboard.writeText(target.getAttribute('glyph'));
+        previousContent = target.innerHTML;
+
+        target.textContent = "Copied!";
+        target.classList.remove("symbol");
+        target.classList.add("symbol-clicked");
+
+        setTimeout(() => {
+            target.innerHTML = previousContent;
+            target.classList.remove("symbol-clicked");
+            target.classList.add("symbol");
+        }, 1000);
+    }
+
     for (const symbolInfo of symbols) {
         symbolSearchTerms = symbolInfo.searchTerms.join(" ");
         if (searchTerm !== "" && !symbolSearchTerms.toLowerCase().includes(searchTerm)) {
@@ -269,29 +289,14 @@ function renderSymbols(searchTerm) {
         elem.tabIndex = 0;
         elem.textContent = symbolInfo.display || symbolInfo.glyph;
         elem.title = symbolInfo.name;
+        elem.setAttribute('glyph', symbolInfo.glyph);
 
-        const handleAction = () => {
-            if (elem.classList.contains("symbol-clicked")) return;
-
-            navigator.clipboard.writeText(symbolInfo.glyph);
-
-            elem.textContent = "Copied!";
-            elem.classList.remove("symbol");
-            elem.classList.add("symbol-clicked");
-
-            setTimeout(() => {
-                elem.textContent = symbolInfo.display || symbolInfo.glyph;
-                elem.title = symbolInfo.name;
-                elem.classList.remove("symbol-clicked");
-                elem.classList.add("symbol");
-            }, 1000);
-        }
-        elem.addEventListener("click", handleAction);
+        elem.addEventListener("click", (event) => handleAction(event.target));
 
         elem.addEventListener("keydown", (event) => {
             if (event.key === "Enter" || event.key === " ") {
                 event.preventDefault();
-                handleAction();
+                handleAction(event.target);
             }
         });
         parent.appendChild(elem);
